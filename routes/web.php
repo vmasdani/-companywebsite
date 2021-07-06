@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Payment;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,8 +19,16 @@ Route::get('/', function () {
 });
 
 Route::get('/test-send-payment', function () {
-    return [
-        'test' => 'hellloi',
-        'hi' => 'people!'
-    ];
+    $new_pay = new Payment;
+    $new_pay->amount = 100;
+    $new_pay->note = 'testnote'; 
+    $new_pay->userId = 0;
+
+    $new_pay->save();
+    
+
+    // return [
+    //     'test' => 'hellloi',
+    //     'hi' => 'people!'
+    // ];
 });

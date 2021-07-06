@@ -29,7 +29,7 @@
 
         <div>
 
-            {{ json_encode(\App\Models\Payment::get()) }}
+            {{ json_encode(\App\Models\Payment::all()) }}
         </div>
 
         <!-- Button trigger modal -->
