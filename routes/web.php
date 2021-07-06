@@ -21,7 +21,7 @@ Route::get('/', function () {
 Route::get('/test-send-payment', function () {
     $new_pay = new Payment;
     $new_pay->amount = 100;
-    $new_pay->note = 'testnote'; 
+    $new_pay->note = 'testnotey'; 
     $new_pay->userId = 0;
 
     $new_pay->save();
