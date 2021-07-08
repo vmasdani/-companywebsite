@@ -14,5 +14,13 @@ class Payment extends Model
         'user_id'
     ];
 
+    protected $attributes = [
+        'id' => null,
+        'amount' => 0,
+        'note' => '',
+        'userId' => 0,
+        'user_id' => null
+    ];
+
     use HasFactory;
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductController;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Route;
 
@@ -19,16 +20,18 @@ Route::get('/', function () {
 });
 
 Route::get('/test-send-payment', function () {
-    $new_pay = new Payment;
-    $new_pay->amount = 100;
-    $new_pay->note = 'testnotey'; 
-    $new_pay->userId = 0;
+    $make_pay = new Payment;
 
-    $new_pay->save();
-    
+
+    Payment::updateOrCreate(['id' => 0], [$make_pay]);
+
 
     // return [
     //     'test' => 'hellloi',
     //     'hi' => 'people!'
     // ];
 });
+
+Route::get('/products', [ProductController::class, 'all']);
+Route::get('/products-dummy-create', [ProductController::class, 'dummy_create']);
+
