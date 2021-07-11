@@ -24,6 +24,12 @@ Route::get('/login', function () {
     return view('login', ['baseUrl' => env('BASE_URL')]);
 });
 
+Route::get('/about', function () {
+    return view('about', ['baseUrl' => env('BASE_URL')]);
+});
+
+
+
 Route::post('/auth-login', [UserController::class, 'login']);
 
 Route::group(['middleware' => ['jwt.verify']], function () {
