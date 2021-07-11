@@ -21,6 +21,8 @@
 </head>
 
 <body>
+    <input id="base-url" value="{{ $baseUrl }}" style="display:none"></input>
+
     <div class="vh-100 bg-light d-flex justify-content-center align-items-center">
         <div class="p-3 shadow shadow-md rounded-3">
             <div class="mb-3">
@@ -36,15 +38,15 @@
             </div>
 
 
-            <form>
+            <form id="login-form">
                 <div class="my-2">
-                    <input class="form-control" placeholder="Username.." />
+                    <input id="username-input" class="form-control" placeholder="Username.." />
                 </div>
                 <div class="my-2">
-                    <input class="form-control" placeholder="Password.." />
+                    <input id="password-input" type="password" class="form-control" placeholder="Password.." />
                 </div>
                 <div class="d-flex justify-content-center">
-                    <button class="btn btn-primary">Login</button>
+                    <button type="submit" class="btn btn-primary">Login</button>
                 </div>
 
             </form>
@@ -52,6 +54,35 @@
     </div>
 
 
+
+    <script>
+        document.querySelector('#login-form').addEventListener('submit', async (e) => {
+            try {
+                e.preventDefault()
+
+                const baseUrl = document.querySelector('#base-url').value
+
+                const resp = await fetch(`${baseUrl}/auth-login`, {
+                    method: 'post',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: document.querySelector('#username-input').value,
+                        password: document.querySelector('#password-input').value
+                    })
+                })
+
+                if (resp.status !== 200) throw await resp.text()
+
+                localStorage.setItem('apiKey', (await resp.json())?.token)
+                window.location = baseUrl
+            } catch (e) {
+                alert(e)
+                console.log(e)
+            }
+        })
+    </script>
 </body>
 
 <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>

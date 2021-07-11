@@ -87,4 +87,11 @@ class PaymentController extends Controller
     {
         //
     }
+
+    public function jwt_verify_test()
+    {
+        return [
+            'test' => 'hello'
+        ];
+    }
 }
