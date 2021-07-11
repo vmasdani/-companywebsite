@@ -28,6 +28,21 @@ Route::get('/about', function () {
     return view('about', ['baseUrl' => env('BASE_URL')]);
 });
 
+Route::get('/users-page', function () {
+    return view('users', ['baseUrl' => env('BASE_URL')]);
+});
+
+Route::get('/payment-admin', function () {
+    return view('payment-admin', ['baseUrl' => env('BASE_URL')]);
+});
+
+Route::get('/payment-user', function () {
+    return view('payment-user', ['baseUrl' => env('BASE_URL')]);
+});
+
+
+
+
 
 
 Route::post('/auth-login', [UserController::class, 'login']);

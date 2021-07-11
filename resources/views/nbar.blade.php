@@ -46,9 +46,9 @@
         document.querySelector('#admin-dropdown').innerHTML =
             localStorage.getItem('apiKey') ?
             `
-                        <li><a class="dropdown-item" href="">Users</a></li>
-                        <li><a class="dropdown-item" href="">Payment - Admin</a></li>
-                        <li><a class="dropdown-item" href="">Payment - User</a></li>
+                        <li><a class="dropdown-item" href="users-page">Users</a></li>
+                        <li><a class="dropdown-item" href="payment-admin">Payment - Admin</a></li>
+                        <li><a class="dropdown-item" href="payment-user">Payment - User</a></li>
                         
                     ` :
             `<li><a class="dropdown-item" href="login">Login</a></li>
