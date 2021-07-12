@@ -18,9 +18,6 @@ class UserController extends Controller
         $username = $body->username;
         $password = $body->password;
 
-
-        $foundUser = User::where('username', '=', $username)->first();
-
         $credentials = ['username' => $username, 'password' => $password];
 
         // var_dump($credentials);
