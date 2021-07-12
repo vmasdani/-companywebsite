@@ -72,6 +72,8 @@ Route::get('/test-send-payment', function () {
 
 // Users
 Route::get('/users', [UserController::class, 'all']);
+Route::post('/users-save-batch', [UserController::class, 'save_batch']);
+
 
 // Users populate
 Route::get('/users-populate', [UserController::class, 'populate']);

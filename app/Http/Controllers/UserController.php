@@ -31,7 +31,6 @@ class UserController extends Controller
         }
 
         return response()->json(compact('token'));
-
     }
 
     public function all()
@@ -39,7 +38,23 @@ class UserController extends Controller
         return User::all();
     }
 
+    public function save_batch(Request $request)
+    {
+        $users_json = (array) json_decode($request->getContent());
 
+        $users = [];
+
+        foreach ($users_json as $user_json) {
+            $new_user = json_decode(json_encode(new \App\Models\User((array) $user_json)));
+
+            // var_dump($new_user);
+
+            array_push($users, $new_user);
+            User::updateOrCreate(['id' => $new_user->id], (array) $new_user);
+        }
+
+        return $users;
+    }
 
     public function populate()
     {

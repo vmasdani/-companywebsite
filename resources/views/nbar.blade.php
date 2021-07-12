@@ -1,11 +1,13 @@
 <nav class="navbar sticky-top top-0 navbar-expand-lg navbar-light bg-light">
+    <input id="base-url-val" value="{{ $baseUrl }}" style="display:none">
+
     <div class="container-fluid">
 
         <a class="navbar-brand" href="{{ $baseUrl ?? '' }}">Company Website</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <!-- <li class="nav-item">
@@ -35,12 +37,17 @@
             `<button class="btn btn-outline-danger" type="submit" id="logout-btn">Logout</button>` :
             ''
 
-        document.querySelector('#logout-btn')?.addEventListener('click', () => {
+        document.querySelector('#logout-btn')?.addEventListener('click', (e) => {
+            e.preventDefault()
             localStorage.removeItem('apiKey')
 
-            alert('Logout success.')
+            const homeUrl = document.querySelector('#base-url-val').value
 
-            window.location.reload()
+            // alert('Logout success.')     
+
+            // console.log(window.location)
+            window.location = (homeUrl)
+            return false;
         })
 
         document.querySelector('#admin-dropdown').innerHTML =

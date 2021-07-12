@@ -15,6 +15,7 @@
     {{ view('nbar',  ['baseUrl' => env('BASE_URL')]) }}
 
     <input id="users-data" value="{{ $users }}" style="display:none">
+    <input id="base-url" value="{{ env('BASE_URL') }}" style="display:none">
 
     <div class="m-3">
         <h1>Users</h1>
@@ -34,6 +35,7 @@
             </div>
 
         </div>
+        <script src="{{ asset('js/bcrypt.min.js') }}"></script>
 
         <script>
             let users = []
@@ -46,6 +48,8 @@
                             <th>#</th>
                             <th>Name</th>
                             <th>Username</th>
+                            <th>Email</th>
+                            <th>Password</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,23 +58,27 @@
                                 <tr>
                                     <td>${i + 1}</td>
                                     <td>
-                                        <input class="form-control" placeholder="Name..." value="${user?.name}">
+                                        <input id="name-form-${i}" class="form-control" placeholder="Name..." value="${user?.name}" oninput="inputName(${i})">
                                     </td>
                                     <td>
-                                        <input class="form-control" placeholder="Username..." value="${user?.username}">
+                                        <input id="username-form-${i}" class="form-control" placeholder="Username..." value="${user?.username}"  oninput="inputUsername(${i})">
+                                    </td>
+                                    <td>
+                                        <input id="email-form-${i}" class="form-control" placeholder="Email..." value="${user?.email}" oninput="inputEmail(${i})">
                                     </td>
                                     
+                                    <td>
+                                        <button class="btn btn-outline-success"  onclick="changePassword(${i})">Change Password</button </div>
+                                    </td>
                                 </tr>
                             `;
                         }).join('')}
                     </tbody>
-                </table>
-                    
+                </table> 
                 `
             }
 
             const usersStr = document.querySelector('#users-data').value;
-
 
             if (usersStr) {
                 users = JSON.parse(usersStr)
@@ -84,21 +92,99 @@
                     {
                         id: null,
                         username: '',
-                        name: ''
+                        name: '',
+                        email: `email_${new Date().getTime()}@${Math.round (Math.random() * 1000)}`
                     }
                 ]
 
                 render()
             })
 
-            document.querySelector('#save-btn').addEventListener('click', () => {
-                window.location.reload()
+            document.querySelector('#save-btn').addEventListener('click', async () => {
+                try {
+                    const baseUrl = document.querySelector('#base-url').value
+                    const resp = await fetch(`${baseUrl}/users-save-batch`, {
+                        method: 'post',
+                        headers: {
+                            authorization: localStorage.getItem('apiKey'),
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify(users)
+                    })
+
+                    if (resp.status !== 200) throw await resp.text()
+
+                    alert('Save successful!')
+
+                    window.location.reload()
+                } catch (e) {
+                    console.error(e)
+                }
+
+                // window.location.reload()
             })
+
+            const inputName = (i) => {
+                const val = document.querySelector(`#name-form-${i}`)?.value
+
+                if (val) {
+                    users = users.map((user, ix) => ix === i ? {
+                        ...user,
+                        name: val
+                    } : user)
+                }
+            }
+
+            const inputUsername = (i) => {
+                const val = document.querySelector(`#username-form-${i}`)?.value
+
+                if (val) {
+                    users = users.map((user, ix) => ix === i ? {
+                        ...user,
+                        username: val
+                    } : user)
+                }
+            }
+
+            const inputEmail = (i) => {
+                const val = document.querySelector(`#email-form-${i}`)?.value
+
+                if (val) {
+                    users = users.map((user, ix) => ix === i ? {
+                        ...user,
+                        email: val
+                    } : user)
+                }
+            }
+
+            const changePassword = (i) => {
+                const pass = prompt('Please enter your new password:')
+
+                if (pass && pass !== "") {
+                    var salt = dcodeIO.bcrypt.genSaltSync(10);
+                    var hash = dcodeIO.bcrypt.hashSync(pass, salt);
+
+                    // console.log(hash)
+                    // console.log(dcodeIO.bcrypt)
+
+                    users = users.map((user, ix) => ix === i ? {
+                        ...user,
+                        password: hash
+                    } : user)
+
+
+
+                    alert('Password successfully changed! Don\'t forget to save.')
+                } else {
+                    alert('Password not changed.')
+                }
+            }
         </script>
 
 </body>
 
 <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+
 
 
 </html>
