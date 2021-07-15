@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentDetailController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Models\Payment;
+use App\Models\PaymentDetail;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -37,7 +39,19 @@ Route::get('/users-page', function () {
 });
 
 Route::get('/payment-admin', function () {
-    return view('payment-admin', ['baseUrl' => env('BASE_URL')]);
+    $usersMapped  = [];
+
+    foreach (User::all() as   $user) {
+        array_push($usersMapped, [
+            'user' => $user,
+            'payments' => Payment::where('user_id', '=', $user->id)->get()
+        ]);
+    }
+
+    return view('payment-admin', [
+        'baseUrl' => env('BASE_URL'),
+        'users' => json_encode($usersMapped)
+    ]);
 });
 
 Route::get('/payment-user', function () {
@@ -80,3 +94,7 @@ Route::get('/users-populate', [UserController::class, 'populate']);
 
 Route::get('/products', [ProductController::class, 'all']);
 Route::get('/products-dummy-create', [ProductController::class, 'dummy_create']);
+
+// Payment Detail
+Route::get('/paymentdetails', [PaymentDetailController::class, 'all']);
+Route::get('/paymentdetails-test-add', [PaymentDetailController::class, 'testAdd']);
