@@ -16,9 +16,10 @@ class VerifyCsrfToken extends Middleware
         'auth-login',
 
         // Users
-        'users-save-batch'
+        'users-save-batch',
 
         // Payments
+        'payments-save'
 
     ];
 }

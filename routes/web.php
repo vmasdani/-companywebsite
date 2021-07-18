@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Models\Payment;
 use App\Models\PaymentDetail;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -50,18 +51,14 @@ Route::get('/payment-admin', function () {
 
     return view('payment-admin', [
         'baseUrl' => env('BASE_URL'),
-        'users' => json_encode($usersMapped)
+        'users' => json_encode($usersMapped),
+        'roles' => Role::all()
     ]);
 });
 
 Route::get('/payment-user', function () {
     return view('payment-user', ['baseUrl' => env('BASE_URL')]);
 });
-
-
-
-
-
 
 Route::post('/auth-login', [UserController::class, 'login']);
 
@@ -94,6 +91,8 @@ Route::get('/users-populate', [UserController::class, 'populate']);
 
 Route::get('/products', [ProductController::class, 'all']);
 Route::get('/products-dummy-create', [ProductController::class, 'dummy_create']);
+
+Route::post('/payments-save', [PaymentController::class, 'save']);
 
 // Payment Detail
 Route::get('/paymentdetails', [PaymentDetailController::class, 'all']);

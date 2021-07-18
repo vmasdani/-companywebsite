@@ -23,6 +23,7 @@ class User extends Authenticatable implements JWTSubject
         'username',
         'email',
         'password',
+        'role_id'
     ];
 
     /**
@@ -49,7 +50,8 @@ class User extends Authenticatable implements JWTSubject
         'name' => '',
         'username' => '',
         'email' => '',
-        'password' => ''
+        'password' => '',
+        'role_id' => null
     ];
 
     public function getJWTIdentifier()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use PDO;
 
 class PaymentController extends Controller
 {
@@ -93,5 +94,34 @@ class PaymentController extends Controller
         return [
             'test' => 'hello'
         ];
+    }
+
+    public function save(Request $request)
+    {
+        $paymentsData = json_decode($request->getContent());
+
+        $payments = [];
+
+        foreach ($paymentsData as $payment) {
+            foreach ($payment->payments as $paymentTable) {
+                $paymentObj = new Payment((array) json_decode(json_encode($paymentTable)));
+
+                if ($payment->user) {
+                    $paymentObj->user_id = $payment->user->id;
+                }
+
+                // if ($paymentObj->date) {
+                //     $paymentObj->date = date('Y-m-d H:i:s', $paymentObj->date);
+                // }
+
+
+
+                var_dump($paymentObj->id);
+
+                Payment::updateOrCreate(['id' => $paymentObj->id], (array) json_decode($paymentObj));
+            }
+        }
+
+        return $paymentsData;
     }
 }

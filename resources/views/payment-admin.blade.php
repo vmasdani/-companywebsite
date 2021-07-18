@@ -16,10 +16,20 @@
     {{ view('nbar',  ['baseUrl' => env('BASE_URL')]) }}
 
     <input id="users-data" value="{{ $users }}" style="display:none">
+    <input id="roles-data" value="{{ $roles }}" style="display:none">
+
     <input id="base-url" value="{{ env('BASE_URL') }}" style="display:none">
 
-    <div class="m-3">
+    <div class="d-flex align-items-center m-3">
         <h1>Payment - Admin</h1>
+        <div class="mx-3">
+            <button class="btn btn-primary" onclick="handleSave()">
+                <i class="bi bi-save"></i>Save
+            </button>
+
+        </div>
+
+    </div>
     </div>
 
     <hr />
@@ -30,6 +40,32 @@
 
     <script>
         let users = []
+
+        const makeDateStringUTC = (date) => {
+            if (date) {
+                const y = `${date.getUTCFullYear()}`
+                const m = date.getUTCMonth() + 1 < 10 ? `0${date.getUTCMonth() + 1}` : `${date.getUTCMonth() + 1}`
+                const d = date.getUTCDate() < 10 ? `0${date.getUTCDate()}` : `${date.getUTCDate()}`
+
+                return `${y}-${m}-${d}`
+            } else {
+                return null
+            }
+        }
+
+        const makeDateString = (date) => {
+            if (date) {
+                const y = `${date.getFullYear()}`
+                const m = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : `${date.getMonth() + 1}`
+                const d = date.getDate() < 10 ? `0${date.getDate()}` : `${date.getDate()}`
+
+                return `${y}-${m}-${d}`
+            } else {
+                return null
+            }
+        }
+
+
 
         const render = async () => {
             try {
@@ -59,35 +95,42 @@
                                                         <i class="bi bi-plus-lg"></i>
                                                     </button>
                                                     ${user?.payments?.map((payment, j) => {
+                                                        const date = payment.date ? makeDateString(new Date(payment.date)) : null;
+
                                                         return `
                                                             <div class="my-1 d-flex align-items-center">
                                                                 <button class="btn btn-sm btn-danger">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button> 
-                                                                <div class="mx-1" >Payment ${j}</div>
+                                                                <!-- div class="mx-1" >Payment ${j}</div -->
                                                                 <div class="dropdown border  shadow mx-1">
-                                                                    <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                        ${`3x`}
-                                                                    </button>
-                                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                                                        <li><a class="dropdown-item" href="#">3x</a></li>
-                                                                        <li><a class="dropdown-item" href="#">6x</a></li>
-                                                                        <li><a class="dropdown-item" href="#">12x</a></li>
-                                                                    </ul>
+                                                                   
+                                                                    <select oninput="handleChangePayment(${i}, ${j}, event)">
+                                                                        <option selected>${payment?.months ?? ''}x</option>
+                                                                        <option value="3">3x</option>
+                                                                        <option value="6">6x</option>
+                                                                        <option value="12">12x</option>
+                                                                    </select>
                                                                 </div>
                                                                 <div class="mx-1 shadow px-2 py-1">
-                                                                    <input class="form-control" type="date" ></input>
-                                                                    Due ${Intl.DateTimeFormat(navigator?.language ?? 'en-US', {dateStyle: 'medium'}).format(new Date())}
+                                                                    <input value="${date}" class="form-control" type="date" oninput="handleChangePaymentDate(${i}, ${j}, event)"></input>
+                                                                    Due ${payment.date 
+                                                                                ? payment.months
+                                                                                    ? Intl.DateTimeFormat(navigator?.language ?? 'en-US', {dateStyle: 'medium'}).format(new Date(new Date(payment.date).getTime() +  (payment.months * 86400000 * 28  ) ))
+                                                                                    : '<div class="text-danger">Select month first</div>'
+                                                                                : '<div class="text-danger">None</div>'
+                                                                        }
                                                                 </div>
                                                                 <div class="">
-                                                                    Description
+                                                                    note
                                                                     <textarea 
-                                                                        oninput="handleChangePaymentDescription(${i},${j})"  
+                                                                        oninput="handleChangePaymentnote(${i},${j})"  
                                                                         class="form-control" 
-                                                                        placeholder="Description here..." 
-                                                                        id="description-${i}-${j}" 
+                                                                        placeholder="note here..." 
+                                                                        id="note-${i}-${j}" 
                                                                         class="form-control"
-                                                                    >${payment?.description ?? ''}</textarea>
+                                                                        value="${payment?.note ?? ''}"
+                                                                    >${payment?.note ?? ''}</textarea>
                                                                 </div>
                                                                 <div class="shadow px-2 py-1">
                                                                     <div class="form-floating">
@@ -164,9 +207,9 @@
             }).format(isNaN(parseInt(amount)) ? 0 : parseInt(amount))
         }
 
-        const handleChangePaymentDescription = (i, j, e) => {
+        const handleChangePaymentnote = (i, j, e) => {
             console.log(i, j, e)
-            const desc = document.querySelector(`#description-${i}-${j}`).value
+            const desc = document.querySelector(`#note-${i}-${j}`).value
 
             console.log('desc', desc)
 
@@ -175,13 +218,67 @@
                 payments: user?.payments ?
                     user.payments.map((payment, jx) => j === jx ? {
                         ...payment,
-                        description: desc
+                        note: desc
                     } : payment) : user?.payments
             } : user)
 
-            console.log(document.querySelector(`#description-${i}-${j}`))
+            console.log(document.querySelector(`#note-${i}-${j}`))
 
-            document.querySelector(`#description-${i}-${j}`).value = desc
+            document.querySelector(`#note-${i}-${j}`).value = desc
+        }
+
+        const handleChangePaymentDate = (i, j, e) => {
+            console.log(i, j, e)
+            const date = e.target.value
+
+            console.log('date', e.target.value)
+
+            users = users.map((user, ix) => i === ix ? {
+                ...user,
+                payments: user?.payments ?
+                    user.payments.map((payment, jx) => j === jx ? {
+                        ...payment,
+                        date: `${date}T00:00:00`
+                    } : payment) : user?.payments
+            } : user)
+
+            render()
+        }
+
+
+
+        const handleSave = async () => {
+            try {
+                // alert('Saving...')
+                const baseUrl = document.querySelector('#base-url').value
+
+                const resp = await fetch(`${baseUrl}/payments-save`, {
+                    method: 'post',
+                    headers: {
+                        'content-type': 'application/json',
+                        authorization: localStorage.getItem('apiKey')
+                    },
+                    body: JSON.stringify(users)
+                })
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        const handleChangePayment = (i, j, e) => {
+            console.log(i, j, e)
+            const months = e.target.value
+
+            users = users.map((user, ix) => i === ix ? {
+                ...user,
+                payments: user?.payments ?
+                    user.payments.map((payment, jx) => j === jx ? {
+                        ...payment,
+                        months: isNaN(parseInt(months)) ? 0 : parseInt(months)
+                    } : payment) : user?.payments
+            } : user)
+
+            render()
         }
     </script>
 </body>
