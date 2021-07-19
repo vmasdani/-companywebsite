@@ -106,20 +106,37 @@
                                                                 <div class="dropdown border  shadow mx-1">
                                                                    
                                                                     <select oninput="handleChangePayment(${i}, ${j}, event)">
-                                                                        <option selected>${payment?.months ?? ''}x</option>
-                                                                        <option value="3">3x</option>
-                                                                        <option value="6">6x</option>
-                                                                        <option value="12">12x</option>
+                                                                        <option selected>${payment?.years ?? '0'} yr</option>
+                                                                        <option value="10">10 yr</option>
+                                                                        <option value="15">15 yr</option>
+                                                                        <option value="20">20 yr</option>
                                                                     </select>
                                                                 </div>
                                                                 <div class="mx-1 shadow px-2 py-1">
                                                                     <input value="${date}" class="form-control" type="date" oninput="handleChangePaymentDate(${i}, ${j}, event)"></input>
-                                                                    Due ${payment.date 
-                                                                                ? payment.months
-                                                                                    ? Intl.DateTimeFormat(navigator?.language ?? 'en-US', {dateStyle: 'medium'}).format(new Date(new Date(payment.date).getTime() +  (payment.months * 86400000 * 28  ) ))
-                                                                                    : '<div class="text-danger">Select month first</div>'
-                                                                                : '<div class="text-danger">None</div>'
-                                                                        }
+                                                                    <div>
+                                                                        Due ${payment.date 
+                                                                                    ? payment.years
+                                                                                        ? (() => {
+                                                                                            const paymentDate = new Date(new Date(payment.date).getTime());
+
+                                                                                            const newDate = new Date((paymentDate.getFullYear() + payment.years ?? 0) , paymentDate.getMonth(), paymentDate.getDate());
+                                                                                            
+
+                                                                                            return Intl.DateTimeFormat(navigator?.language ?? 'en-US', {dateStyle: 'medium'}).format(newDate)
+                                                                                        })()
+                                                                                        : '<div class="text-danger">Select years first</div>'
+                                                                                    : '<div class="text-danger">None</div>'
+                                                                            }
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong  id="amount-display-years-${i}-${j}"> ${`${Intl.NumberFormat(navigator?.language ?? 'en-US', {
+                                                                            style: 'currency',
+                                                                            currency: 'IDR'
+                                                                        }).format(isNaN(parseInt(payment?.amount ?? '')) ? 0 : parseInt((payment?.amount ?? 0) / (payment?.years ?? 1) / 12))} each month`
+                                                                    }</strong>
+                                                                    </div>
+                                                                    
                                                                 </div>
                                                                 <div class="">
                                                                     note
@@ -205,6 +222,18 @@
                 style: 'currency',
                 currency: 'IDR'
             }).format(isNaN(parseInt(amount)) ? 0 : parseInt(amount))
+
+            const foundUserPayment = users[i]?.payments[j];
+
+            if (foundUserPayment) {
+                document.querySelector(`#amount-display-years-${i}-${j}`).innerHTML = `${Intl.NumberFormat(navigator?.language ?? 'en-US', {
+                    style: 'currency',
+                    currency: 'IDR'
+                }).format(isNaN(parseInt(amount)) ? 0 : parseInt(amount / (foundUserPayment?.years ?? 0) / 12))} each month`
+            }
+
+
+
         }
 
         const handleChangePaymentnote = (i, j, e) => {
@@ -274,7 +303,7 @@
                 payments: user?.payments ?
                     user.payments.map((payment, jx) => j === jx ? {
                         ...payment,
-                        months: isNaN(parseInt(months)) ? 0 : parseInt(months)
+                        years: isNaN(parseInt(months)) ? 0 : parseInt(months)
                     } : payment) : user?.payments
             } : user)
 

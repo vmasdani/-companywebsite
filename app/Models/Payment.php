@@ -13,7 +13,8 @@ class Payment extends Model
         'months',
         'note',
         'user_id',
-        'date'
+        'date',
+        'years'
     ];
 
     protected $attributes = [
@@ -23,7 +24,8 @@ class Payment extends Model
         'note' => '',
         'userId' => 0,
         'user_id' => null,
-        'date' => null
+        'date' => null,
+        'years' => 0
     ];
 
     use HasFactory;
