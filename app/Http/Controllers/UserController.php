@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\JWTAuth as JWTAuthJWTAuth;
 
 class UserController extends Controller
 {
@@ -31,6 +33,16 @@ class UserController extends Controller
         }
 
         return response()->json(compact('token'));
+    }
+
+    public function get()
+    {
+        // return User::where('id', '=', $id)->first();
+        return User::where('id', '=', JWTAuth::parseToken()->getPayload()['sub'])->first();
+    }
+
+    public function getPayments() {
+        return Payment::where('user_id', '=', JWTAuth::parseToken()->getPayload()['sub'])->get();
     }
 
     public function all()

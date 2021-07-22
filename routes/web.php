@@ -83,7 +83,11 @@ Route::get('/test-send-payment', function () {
 
 // Users
 Route::get('/users', [UserController::class, 'all']);
+Route::get('/user-get', [UserController::class, 'get']);
 Route::post('/users-save-batch', [UserController::class, 'save_batch']);
+
+// Get user payments
+Route::get('/user-get-payments', [UserController::class, 'getPayments']);
 
 
 // Users populate
