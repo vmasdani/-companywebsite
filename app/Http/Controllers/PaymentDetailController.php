@@ -17,4 +17,11 @@ class PaymentDetailController extends Controller
     {
         return PaymentDetail::updateOrCreate(['id' => null], (array) json_decode(json_encode(new PaymentDetail)));
     }
+
+    public function saveBatch(Request $request)
+    {
+        $paymentDetails = json_decode($request->getContent());
+
+        return $paymentDetails;
+    }
 }

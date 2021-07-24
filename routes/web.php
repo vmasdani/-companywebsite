@@ -88,6 +88,8 @@ Route::post('/users-save-batch', [UserController::class, 'save_batch']);
 
 // Get user payments
 Route::get('/user-get-payments', [UserController::class, 'getPayments']);
+Route::get('/user-get-payment-details', [UserController::class, 'getPaymentDetails']);
+
 
 
 // Users populate
@@ -101,3 +103,5 @@ Route::post('/payments-save', [PaymentController::class, 'save']);
 // Payment Detail
 Route::get('/paymentdetails', [PaymentDetailController::class, 'all']);
 Route::get('/paymentdetails-test-add', [PaymentDetailController::class, 'testAdd']);
+Route::post('/paymentdetails-save-batch', [PaymentDetailController::class, 'saveBatch']);
+

@@ -2,86 +2,129 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Payment - User | Company Name</title>
-    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
+  <title>Payment - User | Company Name</title>
+  <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
 
 </head>
 
 <body>
-    {{ view('nbar',  ['baseUrl' => env('BASE_URL')]) }}
+  {{ view('nbar',  ['baseUrl' => env('BASE_URL')]) }}
 
-    <input id="base-url" value="{{ $baseUrl }}" style="display:none"></input>
+  <input id="base-url" value="{{ $baseUrl }}" style="display:none"></input>
 
-    <div class="m-3">
-        <h1>Payment - User</h1>
-    </div>
+  <div class="m-3">
+    <h1>Payment - User</h1>
+  </div>
 
-    <hr />
+  <hr />
 
-    <div class="m-3">
-        <h5 id="user-name"></h5>
-    </div>
+  <div class="m-3">
+    <h5 id="user-name"></h5>
+  </div>
 
-    <div id="user-payments"></div>
+  <div id="user-payments"></div>
 
-    <script>
-        const baseUrl = document.querySelector(`#base-url`).value
+  <script>
+    const baseUrl = document.querySelector(`#base-url`).value
 
-        // State
-        let user = null
-        let payments = []
+    // State
+    let user = null
+    let payments = []
+    let paymentDetails = []
+
+    const fetchUserData = async () => {
+      try {
+        const resp = await fetch(`${baseUrl}/user-get`, {
+          headers: {
+            'authorization': `Bearer ${localStorage.getItem('apiKey')}`
+          }
+        })
+        if (resp.status !== 200) throw await resp.text()
+
+        return (await resp.json())
+      } catch (e) {
+        console.error(e)
+        return null
+      }
+
+    }
+
+    const fetchUserPaymentData = async () => {
+      try {
+        const resp = await fetch(`${baseUrl}/user-get-payments`, {
+          headers: {
+            'authorization': `Bearer ${localStorage.getItem('apiKey')}`
+          }
+        })
+        if (resp.status !== 200) throw await resp.text()
+
+        return (await resp.json())
+      } catch (e) {
+        console.error(e)
+        return []
+      }
+    }
+
+    const fetchUserPaymentDetailsData = async () => {
+      try {
+        const resp = await fetch(`${baseUrl}/user-get-payment-details`, {
+          headers: {
+            'authorization': `Bearer ${localStorage.getItem('apiKey')}`
+          }
+        })
+        if (resp.status !== 200) throw await resp.text()
+
+        return (await resp.json())
+      } catch (e) {
+        console.error(e)
+        return []
+      }
+    }
 
 
-        const fetchUserData = async () => {
-            try {
-                const resp = await fetch(`${baseUrl}/user-get`, {
-                    headers: {
-                        'authorization': `Bearer ${localStorage.getItem('apiKey')}`
-                    }
-                })
-                if (resp.status !== 200) throw await resp.text()
+    const fetchData = async () => {
+      const [userData, paymentsData, paymentDetailsData] = await Promise.all([fetchUserData(), fetchUserPaymentData(), fetchUserPaymentDetailsData()])
 
-                return (await resp.json())
-            } catch (e) {
-                console.error(e)
-                return null
+      user = userData
+      payments = paymentsData
+      paymentDetails = paymentDetailsData
+
+      render()
+    }
+
+    const pay = (epoch) => {
+      if (paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === epoch)) {
+        alert('Payment already found.')
+      } else {
+        const confirmation = confirm(`Really pay ${new Date(epoch)}?`)
+
+
+        if (confirmation) {
+          paymentDetails = [...paymentDetails,
+            {
+              paymentDetail: {
+                epoch: epoch
+              }
             }
-
+          ]
+        } else {
+          alert('Payment cancelled.')
         }
 
-        const fetchUserPaymentData = async () => {
-            try {
-                const resp = await fetch(`${baseUrl}/user-get-payments`, {
-                    headers: {
-                        'authorization': `Bearer ${localStorage.getItem('apiKey')}`
-                    }
-                })
-                if (resp.status !== 200) throw await resp.text()
 
-                return (await resp.json())
-            } catch (e) {
-                console.error(e)
-                return []
-            }
+      }
 
-        }
 
-        const fetchData = async () => {
-            const [userData, paymentsData] = await Promise.all([fetchUserData(), fetchUserPaymentData()])
+      render()
+    }
 
-            user = userData
-            payments = paymentsData
+    const render = () => {
+      document.querySelector('#user-name').innerHTML = user?.name ? `Payments for user ${user?.name}` : 'No user'
 
-            render()
-        }
-
-        const render = () => {
-            document.querySelector('#user-name').innerHTML = user?.name ? `Payments for user ${user?.name}` : 'No user'
-
-            document.querySelector('#user-payments').innerHTML = `
+      document.querySelector('#user-payments').innerHTML = `
                 ${payments.map((payment, i) => {
                     return `
                         <div class="m-3">
@@ -104,21 +147,24 @@
                             </div>
 
                             <div>
-                                    <strong class="text-primary">Done: 0/${(payment?.years ?? 0) * 12}</strong>
+                                    <strong class="text-primary">
+                                      Done: ${paymentDetails?.length ?? 0}/${(payment?.years ?? 0) * 12} 
+                                      <span class="text-success">
+                                        ${
+                                          Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format (
+                                            ((payment?.amount ?? 0) / (payment?.years ?? 1)  / 12) * (paymentDetails?.length ?? 0)) 
+                                          }
+                                      </span>
+                                    </strong>
                             </div>
 
                             <div class="overflow-auto shadow bg-light" style="height:30vh;resize:vertical">
                                 <table class="table table-bordered table-sm table-hover">    
                                     <thead>
                                         <tr>
-                                            <th>#</th>
-                                            <th>Tahun</th>
-                                            <th>Bulan</th>
-                                            <th>Tanggal Lengkap</th>
-                                            <th>Nominal Bayar</th>
-                                            <th>Status</th>
-                                            <th>Bukti</th>
-                                            
+                                          ${['#', 'Tahun', 'Bulan', 'Tanggal Lengkap', 'Nominal Bayar', 'Status', 'Bukti'].map(head => 
+                                              `<th class="bg-secondary text-light" style="top:0;position:sticky">${head}</th>
+                                            `).join('')}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -141,9 +187,36 @@
                                                             Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((payment?.amount ?? 0) / (payment?.years ?? 1)  / 12)
                                                         }
                                                     </td>
-                                                    <td><strong class="text-danger">BELUM BAYAR</strong></td>
                                                     <td>
-                                                        <input type="file" />
+                                                        <div onclick="pay(${newDate})" style="cursor:pointer">
+                                                            ${
+                                                                paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === newDate)
+                                                                    ?   `
+                                                                            <div class="text-success fw-bold">
+                                                                                Lunas
+                                                                            </div>
+                                                                        `
+                                                                    :   `
+                                                                            <div class="text-danger fw-bold">
+                                                                                Belum lunas
+                                                                            </div>
+                                                                        `
+                                                            }
+                                                        </div>
+                                                        
+                                                    </td>
+                                                    <td>
+                                                        ${
+                                                            paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === newDate)
+                                                                ?   `
+                                                                        <div>
+                                                                            <input type="file" />
+                                                                        </div>
+                                                                    `
+                                                                :   `
+                                                                        
+                                                                    `
+                                                        }
                                                     </td>
                                                 </tr>
                                             `
@@ -160,10 +233,10 @@
             `
 
 
-        }
+    }
 
-        fetchData()
-    </script>
+    fetchData()
+  </script>
 
 </body>
 

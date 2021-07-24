@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\PaymentDetail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -41,9 +42,31 @@ class UserController extends Controller
         return User::where('id', '=', JWTAuth::parseToken()->getPayload()['sub'])->first();
     }
 
-    public function getPayments() {
+    public function getPayments()
+    {
         return Payment::where('user_id', '=', JWTAuth::parseToken()->getPayload()['sub'])->get();
     }
+
+    public function getPaymentDetails()
+    {
+        $payments = Payment::where('user_id', '=', JWTAuth::parseToken()->getPayload()['sub'])->get();
+
+        $paymentDetails = [];
+
+        foreach ($payments as $payment) {
+            $foundPaymentDetails = PaymentDetail::where("payment_id", '=', $payment->id)->get();
+
+            foreach ($foundPaymentDetails as $paymentDetail) {
+                array_push($paymentDetails, [
+                    'paymentDetail' => $paymentDetail
+                ]);
+            }
+        }
+
+        return $paymentDetails;
+    }
+
+
 
     public function all()
     {
