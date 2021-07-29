@@ -56,10 +56,29 @@ class UserController extends Controller
         foreach ($payments as $payment) {
             $foundPaymentDetails = PaymentDetail::where("payment_id", '=', $payment->id)->get();
 
+
             foreach ($foundPaymentDetails as $paymentDetail) {
-                array_push($paymentDetails, [
-                    'paymentDetail' => $paymentDetail
-                ]);
+                $foundPaymentDetailBase64Image = null;
+
+                try {
+                    $foundPaymentDetailBase64Image = file_get_contents('images/img_' . $paymentDetail->id);
+                } catch (\Exception $e) {
+                    $foundPaymentDetailBase64Image = null;
+                }
+
+
+                $paymentDetailObj =
+                    [
+                        'paymentDetail' => $paymentDetail,
+                        'base64Image' => '===='
+                    ];
+
+                if ($foundPaymentDetailBase64Image) {
+                    $paymentDetailObj['base64Image'] = base64_encode($foundPaymentDetailBase64Image);
+                } else {
+                    $paymentDetailObj['base64Image'] =  null;
+                }
+                array_push($paymentDetails, $paymentDetailObj);
             }
         }
 

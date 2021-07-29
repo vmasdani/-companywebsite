@@ -102,6 +102,8 @@ Route::post('/payments-save', [PaymentController::class, 'save']);
 
 // Payment Detail
 Route::get('/paymentdetails', [PaymentDetailController::class, 'all']);
+Route::post('/paymentdetails-save', [PaymentDetailController::class, 'save']);
+
 Route::get('/paymentdetails-test-add', [PaymentDetailController::class, 'testAdd']);
 Route::post('/paymentdetails-save-batch', [PaymentDetailController::class, 'saveBatch']);
 

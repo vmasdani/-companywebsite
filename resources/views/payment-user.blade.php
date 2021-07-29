@@ -7,6 +7,8 @@
 
   <title>Payment - User | Company Name</title>
   <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}" />
+
 
 </head>
 
@@ -15,8 +17,15 @@
 
   <input id="base-url" value="{{ $baseUrl }}" style="display:none"></input>
 
-  <div class="m-3">
+  <div class="m-3 d-flex align-items-center">
     <h1>Payment - User</h1>
+
+    <div class="mx-3">
+      <button id="save-btn" class="btn btn-primary">
+        <i class="bi bi-save"></i>
+
+        Save</button>
+    </div>
   </div>
 
   <hr />
@@ -34,6 +43,7 @@
     let user = null
     let payments = []
     let paymentDetails = []
+    let paymentDetailDeleteIds = []
 
     const fetchUserData = async () => {
       try {
@@ -95,8 +105,8 @@
       render()
     }
 
-    const pay = (epoch) => {
-      if (paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === epoch)) {
+    const pay = (epoch, paymentId) => {
+      if (paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === epoch && paymentDetail?.paymentDetail?.payment_id === paymentId)) {
         alert('Payment already found.')
       } else {
         const confirmation = confirm(`Really pay ${new Date(epoch)}?`)
@@ -106,10 +116,14 @@
           paymentDetails = [...paymentDetails,
             {
               paymentDetail: {
-                epoch: epoch
-              }
+                epoch: epoch,
+                payment_id: paymentId,
+              },
+              base64Image: '===='
             }
           ]
+
+          console.log(paymentDetails)
         } else {
           alert('Payment cancelled.')
         }
@@ -119,6 +133,41 @@
 
 
       render()
+    }
+
+    const paymentDetailImageSave = (i, e) => {
+      const file = e.target?.files[0]
+
+      console.log(i, e)
+      console.log(i, file)
+
+
+      const r = new FileReader()
+
+      if (file) {
+        r.readAsDataURL(file)
+
+        r.onload = () => {
+          if (paymentDetails[i]) {
+            paymentDetails[i].base64Image = r.result.split(';base64,')[1]
+
+            render()
+          }
+        }
+      }
+    }
+
+    const showImage = (img) => {
+      const image = new Image()
+      image.src = `data:image/jpg;base64,${img}`
+      // image.style = 'width:50vw;'
+
+      const w = window.open('about:blank')
+
+      setTimeout(() => {
+        w.document.write(image.outerHTML)
+      }, 0)
+
     }
 
     const render = () => {
@@ -188,9 +237,9 @@
                                                         }
                                                     </td>
                                                     <td>
-                                                        <div onclick="pay(${newDate})" style="cursor:pointer">
+                                                        <div onclick="pay(${newDate}, ${payment?.id ?? null})" style="cursor:pointer">
                                                             ${
-                                                                paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === newDate)
+                                                                paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === newDate && paymentDetail?.paymentDetail?.payment_id === payment?.id)
                                                                     ?   `
                                                                             <div class="text-success fw-bold">
                                                                                 Lunas
@@ -206,17 +255,38 @@
                                                         
                                                     </td>
                                                     <td>
-                                                        ${
-                                                            paymentDetails.find(paymentDetail => paymentDetail?.paymentDetail?.epoch === newDate)
-                                                                ?   `
-                                                                        <div>
-                                                                            <input type="file" />
-                                                                        </div>
-                                                                    `
-                                                                :   `
-                                                                        
-                                                                    `
-                                                        }
+                                                        ${(() => {
+                                                          const foundPaymentDetailIndex = paymentDetails.findIndex(paymentDetail => paymentDetail?.paymentDetail?.epoch === newDate && paymentDetail?.paymentDetail?.payment_id === payment?.id);
+                                                          const foundPaymentDetail = foundPaymentDetailIndex !== null && foundPaymentDetailIndex !== undefined  
+                                                            ? paymentDetails[foundPaymentDetailIndex] 
+                                                            : null
+
+                                                          return foundPaymentDetail
+                                                            ?   `
+                                                                    <div>
+                                                                        <input type="file" type="image/*" oninput="paymentDetailImageSave(${foundPaymentDetailIndex}, event)" />
+                                                                    </div>
+
+                                                                    ${foundPaymentDetail?.base64Image && foundPaymentDetail?.base64Image !== "" && foundPaymentDetail?.base64Image !== "===="
+                                                                      ?   `
+                                                                            <div>
+                                                                              <a 
+                                                                                href="#" 
+                                                                                onclick="showImage('${foundPaymentDetail.base64Image}')"  
+                                                                                style="cursor:pointer"
+                                                                              >
+                                                                                Show image (${((foundPaymentDetail.base64Image?.length ?? 0) / 1024 / 1024 * 3 / 4)?.toFixed(2)} MB)
+                                                                              </a>
+                                                                            </div>
+                                                                          `
+                                                                      :   ``
+                                                                    }
+                                                                    <div></div>
+                                                                `
+                                                            :   `
+                                                                    
+                                                                `
+                                                        })()}
                                                     </td>
                                                 </tr>
                                             `
@@ -234,6 +304,26 @@
 
 
     }
+
+    document.querySelector('#save-btn').addEventListener('click', async e => {
+      console.log(paymentDetails)
+
+      try {
+        const resp = await fetch(`${baseUrl}/paymentdetails-save`, {
+          method: 'post',
+          headers: {
+            authorization: localStorage.getItem('apiKey') ?? '',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            data: paymentDetails,
+            paymentDetailDeleteIds: paymentDetailDeleteIds
+          })
+        })
+      } catch (e) {
+        console.error(e)
+      }
+    })
 
     fetchData()
   </script>
