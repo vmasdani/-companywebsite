@@ -197,11 +197,11 @@
 
                             <div>
                                     <strong class="text-primary">
-                                      Done: ${paymentDetails?.length ?? 0}/${(payment?.years ?? 0) * 12} 
+                                      Done: ${paymentDetails?.filter(paymentDetail => paymentDetail?.paymentDetail?.payment_id === payment?.id)?.length ?? 0}/${(payment?.years ?? 0) * 12} 
                                       <span class="text-success">
                                         ${
                                           Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format (
-                                            ((payment?.amount ?? 0) / (payment?.years ?? 1)  / 12) * (paymentDetails?.length ?? 0)) 
+                                            ((payment?.amount ?? 0) / (payment?.years ?? 1)  / 12) * (paymentDetails?.filter(paymentDetail => paymentDetail?.paymentDetail?.payment_id === payment?.id)?.length ?? 0)) 
                                           }
                                       </span>
                                     </strong>
@@ -320,6 +320,8 @@
             paymentDetailDeleteIds: paymentDetailDeleteIds
           })
         })
+
+        window.location.reload()
       } catch (e) {
         console.error(e)
       }
