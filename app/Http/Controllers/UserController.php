@@ -47,10 +47,8 @@ class UserController extends Controller
         return Payment::where('user_id', '=', JWTAuth::parseToken()->getPayload()['sub'])->get();
     }
 
-    public function getPaymentDetails()
+    static public function mapPaymentsToPaymentDetails($payments)
     {
-        $payments = Payment::where('user_id', '=', JWTAuth::parseToken()->getPayload()['sub'])->get();
-
         $paymentDetails = [];
 
         foreach ($payments as $payment) {
@@ -83,6 +81,13 @@ class UserController extends Controller
         }
 
         return $paymentDetails;
+    }
+
+    public function getPaymentDetails()
+    {
+        $payments = Payment::where('user_id', '=', JWTAuth::parseToken()->getPayload()['sub'])->get();
+
+        return $this->mapPaymentsToPaymentDetails($payments);
     }
 
 

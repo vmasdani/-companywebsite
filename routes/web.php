@@ -9,6 +9,7 @@ use App\Models\PaymentDetail;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,24 @@ Route::get('/payment-admin', function () {
         'roles' => Role::all()
     ]);
 });
+
+Route::get('/payment-admin/{id}', function ($id) {
+    $payment = Payment::where("id", "=", $id)->first();
+
+    $paymentDetails = [];
+
+    if ($payment) {
+        $paymentDetails = UserController::mapPaymentsToPaymentDetails([$payment]);
+    }
+
+    return view('payment-user-detail', [
+        'baseUrl' => env('BASE_URL'),
+        'payment' => json_encode($payment),
+        'paymentDetails' => json_encode($paymentDetails)
+    ]);
+});
+
+
 
 Route::get('/payment-user', function () {
     return view('payment-user', ['baseUrl' => env('BASE_URL')]);
@@ -106,4 +125,3 @@ Route::post('/paymentdetails-save', [PaymentDetailController::class, 'save']);
 
 Route::get('/paymentdetails-test-add', [PaymentDetailController::class, 'testAdd']);
 Route::post('/paymentdetails-save-batch', [PaymentDetailController::class, 'saveBatch']);
-

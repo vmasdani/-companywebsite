@@ -41,6 +41,8 @@
     <script>
         let users = []
 
+        const baseUrl = document.querySelector('#base-url').value
+
         const makeDateStringUTC = (date) => {
             if (date) {
                 const y = `${date.getUTCFullYear()}`
@@ -153,12 +155,17 @@
                                                                     <div class="form-floating">
                                                                         <input value="${payment?.amount ?? 0}" oninput="handleChangePaymentAmount(${i},${j})" type="number" id="amount-${i}-${j}" class="form-control"></input>
                                                                         <label for="amount-${i}-${j}">Amount</label>
-                                                                    </div>                                                                       
-                                                                    
+                                                                    </div>                                                            
+                                                                               
                                                                     <div id="amount-display-${i}-${j}">${Intl.NumberFormat(navigator?.language ?? 'en-US', { style: 'currency', currency: 'IDR' }).format(payment?.amount ?? 0)}</div>
                                                                 </div>
                                                                 
-                                                                
+                                                                <div>
+                                                                    <a href="${baseUrl}/payment-admin/${payment.id}">
+                                                                        <button class="btn btn-sm btn-primary">Details</button>
+                                                                    </a>
+                                                                    
+                                                                </div>
                                                                 
                                                             </div>
                                                         `;
