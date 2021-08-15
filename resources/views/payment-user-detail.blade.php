@@ -56,6 +56,8 @@
             : Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(0)
         }</div>
         
+        <div>Payments done: <strong>${paymentDetails?.length ?? 0}/${(payment?.years ?? 0) * 12}</strong> </div>
+
       </div>
     `
 
