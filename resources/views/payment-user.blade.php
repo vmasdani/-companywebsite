@@ -171,16 +171,34 @@
     }
 
     const render = () => {
+
+
+
+
       document.querySelector('#user-name').innerHTML = user?.name ? `Payments for user ${user?.name}` : 'No user'
 
       document.querySelector('#user-payments').innerHTML = `
                 ${payments.map((payment, i) => {
-                    return `
+                  const amount = payment?.amount ?? 0;
+                  const amountWithCashback = amount - 10000000;
+                  const amountWithCashbackAndInterest = amountWithCashback + (amountWithCashback * 5 / 100);  
+                  
+                  return `
                         <div class="m-3">
                             <div>${i + 1}. ${payment?.note}</div>
                             <div>
-                                <h4>Cicilan ${payment?.years ?? 0} tahun, harga ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format (payment?.amount ?? 0)}, per bulan ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((payment?.amount ?? 0) / (payment?.years ?? 1)  / 12)}</h4>
+                                <h4>Cicilan ${payment?.years ?? 0} tahun, harga ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format (payment?.amount ?? 0)}, per bulan ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((amount) / (payment?.years ?? 1)  / 12)}</h4>
                             </div>
+                            <div>
+                                <h4>harga dengan cashback ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format (amountWithCashback)}, per bulan ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((amountWithCashback) / (payment?.years ?? 1)  / 12)}</h4>
+                            </div>
+
+                            <div>
+                                <h4>harga dengan cashback & bunga ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format (amountWithCashbackAndInterest)}, per bulan ${Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((amountWithCashbackAndInterest) / (payment?.years ?? 1)  / 12)}</h4>
+                            </div>
+
+                            
+                            
                             <div class="my-3">
                                 <strong class="text-primary">
                                     Start: ${
@@ -233,7 +251,7 @@
                                                     </td>
                                                     <td>
                                                         ${
-                                                            Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((payment?.amount ?? 0) / (payment?.years ?? 1)  / 12)
+                                                            Intl.NumberFormat(navigator.language ?? 'en-US', {style: 'currency', currency: 'IDR'}).format ((amountWithCashbackAndInterest) / (payment?.years ?? 1)  / 12)
                                                         }
                                                     </td>
                                                     <td>

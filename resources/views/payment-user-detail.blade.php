@@ -45,16 +45,32 @@
     const payment = JSON.parse(document.querySelector('#payment-data').value)
     const paymentDetails = JSON.parse(document.querySelector('#payment-details-data').value)
 
+    const paymentAmount = payment?.amount ?? 0;
+    const paymentAmountWithCashback = paymentAmount - 10000000;
+    const paymentAmountWithCashbackAndInterest = paymentAmountWithCashback + paymentAmountWithCashback * 5 / 100;
+
+
     document.querySelector('#payment-info').innerHTML = `
       <div>
         <div>${payment?.note}</div>
         <div>${payment?.amount ? Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(payment.amount) : '0' }</div>
         <div>${payment?.years} yr</div>
         <div>Per year: ${
-          payment?.amount && payment?.years 
-            ? Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(payment.amount / 12 / payment.years) 
+          paymentAmount && payment?.years 
+            ? Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(paymentAmount / 12 / payment.years) 
             : Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(0)
         }</div>
+        <div>Per year w/cashback: ${
+          paymentAmount && payment?.years 
+            ? Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(paymentAmountWithCashback / 12 / payment.years) 
+            : Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(0)
+        }</div>
+        <div>Per year w/cashback and interest 5% ${
+          paymentAmount && payment?.years 
+            ? Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(paymentAmountWithCashbackAndInterest / 12 / payment.years) 
+            : Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(0)
+        }</div>
+        
         
         <div>Payments done: <strong>${paymentDetails?.length ?? 0}/${(payment?.years ?? 0) * 12}</strong> </div>
 
